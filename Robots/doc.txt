@@ -1,0 +1,220 @@
+1)
+-Se importa el módulo config, que  contiene 
+las claves de API y secretas necesarias para interactuar 
+con la plataforma Binance.
+-Se importa la clase Client del módulo binance.client. 
+Esta clase proporciona métodos para interactuar con 
+la API de Binance y realizar operaciones de trading.
+-Se importa la enumeración * del módulo binance.enums.
+Esto importa todos los valores constantes disponibles en el módulo,
+que se utilizan para especificar diferentes tipos de órdenes, intervalos de tiempo, etc.
+-Se importa la biblioteca numpy como np. Esta biblioteca se utiliza
+para realizar cálculos numéricos, como ajuste de curvas y cálculos estadísticos.
+-Se importa el módulo time, que proporciona funciones relacionadas con el tiempo,
+como pausas en la ejecución del programa.
+
+2)
+
+Se crea una instancia del cliente de Binance utilizando la clase Client importada previamente.
+config.API_KEY y config.API_SECRET se refieren a las claves de API y secretas que se importan 
+desde el módulo config. Estas claves son necesarias para autenticar y autorizar las operaciones 
+realizadas a través de la API de Binance.
+tld='com' se refiere al dominio de Binance que se utilizará. En este caso, se utiliza el dominio "binance.com".
+
+simbolo='XRPUSDT':
+
+Esta línea define el símbolo del par de trading en el que el robot realizará las operaciones.
+ En este caso, el símbolo es 'XRPUSDT', lo que indica que el robot operará con la criptomoneda
+  XRP en relación con el token USDT (Tether).
+
+cantidadOrden=29.137:
+
+Esta línea define la cantidad de la criptomoneda que se comprará en cada orden.
+En este caso, se establece la cantidad en 29.137 unidades de la criptomoneda.
+Puedes ajustar este valor según tus preferencias o estrategia de trading.
+En resumen, el código establece una instancia del cliente de Binance utilizando 
+las claves de API y secretas proporcionadas en el módulo config.
+ Además, se define el símbolo del par de trading y la cantidad de criptomoneda que se 
+comprará en cada orden. Estos valores son utilizados posteriormente en el bucle 
+principal del programa.
+
+3)
+Este fragmento de código define la función `tendencia()`, 
+que se encarga de realizar un análisis de tendencia utilizando 
+datos históricos de precios. A continuación se explica paso a paso el funcionamiento de esta función:
+
+1. Se inicializan las listas vacías `x` e `y`.
+ Estas listas se utilizarán para almacenar los valores 
+ necesarios para el cálculo de la regresión lineal.
+
+2. Se inicializan las variables `sum` y `ma48_i` a 0.
+ Estas variables se utilizarán para calcular la media
+  móvil de 48 periodos.
+
+3. Se inicializa la variable `resp` como `False`.
+ Esta variable almacenará el resultado de la tendencia (alcista o bajista).
+
+4. Se obtienen los datos históricos de velas de 15 minutos utilizando 
+el método `get_historical_klines` del cliente de Binance.
+Se especifica el símbolo del par de trading (`simbolo`), 
+el intervalo de tiempo (`Client.KLINE_INTERVAL_15MINUTE`) y el período histórico ("12 hour ago UTC").
+
+5. Se verifica si se obtuvieron 60 datos históricos.
+ Si no se obtuvieron exactamente 60 datos, se retorna `False`,
+  indicando que no se pudo realizar el análisis de tendencia.
+
+6. Se realiza un bucle `for` desde `24` hasta `60`.
+ Esto corresponde a las últimas 36 velas de 15 minutos,
+  lo que equivale a un período de aproximadamente 9 horas.
+
+7. Dentro del bucle, se realiza otro bucle `for` desde `i-50` hasta `i`.
+ Esto permite sumar los precios de cierre de las últimas 50 velas para 
+ calcular la media móvil de 48 periodos.
+
+8. Se suma el precio de cierre de cada vela al valor de `sum`.
+
+9. Se calcula la media móvil de 48 periodos dividiendo `sum` entre 50. 
+El resultado se almacena en `ma48_i` con formato de 5 decimales.
+
+10. Se reinicia el valor de `sum` a 0 para el próximo cálculo.
+
+11. Se añade `i` a la lista `x` y `ma48_i` convertido a tipo float a la lista `y`. 
+Estos valores se utilizarán posteriormente para realizar la regresión lineal.
+
+12. Una vez finalizado el bucle, se utiliza el método `np.polyfit` de NumPy para realizar la regresión lineal.
+ Se ajusta una línea recta a los puntos `(x, y)` y se obtiene el modelo de la regresión.
+
+13. Se verifica si el coeficiente de la regresión (`modelo[0]`) es mayor que 0. Si es así, 
+indica una tendencia alcista. En este caso, se actualiza `resp` a `True`.
+
+14. Finalmente, se retorna el valor de `resp`, que indica si hay una tendencia alcista o no.
+
+En resumen, la función `tendencia()` utiliza los datos históricos de precios para calcular
+ una media móvil de 48 periodos y realizar una regresión lineal. 
+ Basándose en el coeficiente de la regresión, determina si hay una tendencia alcista y 
+ retorna el resultado. Esta función es utilizada en el bucle principal para tomar decisiones de compra o venta.
+
+ 4)
+ Este código define la función _ma48_(), que se encarga de calcular la media móvil de 48 periodos
+  utilizando datos históricos de precios. A continuación, se explica paso a paso el funcionamiento de esta función:
+
+Se inicializa la variable ma48_local a 0. Esta variable almacenará el valor de la media móvil de 48 periodos.
+
+Se inicializa la variable sum a 0. Esta variable se utilizará para calcular 
+la suma de los precios de cierre de las velas.
+
+Se obtienen los datos históricos de velas de 15 minutos utilizando 
+el método get_historical_klines del cliente de Binance.
+Se especifica el símbolo del par de trading (simbolo), 
+el intervalo de tiempo (Client.KLINE_INTERVAL_15MINUTE) y el período histórico ("12 hour ago UTC").
+
+Se verifica si se obtuvieron exactamente 48 datos históricos. 
+Si no se obtuvieron 48 datos, se omite el cálculo de la media móvil y se retorna 0.
+
+Se realiza un bucle for desde 0 hasta 48.
+
+Dentro del bucle, se suma el precio de cierre de cada vela al valor de sum.
+ El precio de cierre se obtiene de klines[i][4], que representa el valor 
+ en la cuarta posición de cada vela (precio de cierre).
+
+Una vez finalizado el bucle, se calcula la media móvil de 48 periodos dividiendo sum entre 48.
+ El resultado se almacena en ma48_local.
+
+Finalmente, se retorna el valor de ma48_local, que representa la media móvil de 48 periodos calculada.
+
+En resumen, la función _ma48_() obtiene datos históricos de precios 
+y calcula la media móvil de 48 periodos utilizando los precios de cierre de las velas. 
+Retorna el valor de la media móvil calculada. Esta función es utilizada en el bucle principal
+para tomar decisiones basadas en la media móvil.
+
+5)
+Este fragmento de código es parte del bucle principal del programa y se encarga de verificar si existen órdenes 
+abiertas para el símbolo de trading especificado. A continuación, se explica paso a paso su funcionamiento:
+
+ordenes = cliente.get_open_orders(symbol=simbolo): Se utiliza el método get_open_orders del cliente de Binance
+ para obtener todas las órdenes abiertas relacionadas con el símbolo de trading especificado (simbolo).
+
+print("Ordenes actuales abiertas: "): Se imprime en pantalla un mensaje indicando que se mostrarán las órdenes abiertas actuales.
+
+print(ordenes): Se imprime en pantalla la lista de órdenes abiertas obtenida en el paso 1. Esto muestra la información 
+detallada de cada orden, como el tipo de orden, el precio, la cantidad, etc.
+
+if(len(ordenes) != 0): Se verifica si la longitud de la lista de órdenes abiertas es diferente de cero, es decir, si hay órdenes abiertas.
+
+Si se cumple la condición del paso 4 (hay órdenes abiertas), se ejecuta el siguiente bloque de código:
+
+print(["Existen ordenes abiertas, no se compra"]): Se imprime en pantalla un mensaje indicando 
+que existen órdenes abiertas y que no se realizará una nueva compra.
+time.sleep(10): El programa se detiene durante 10 segundos utilizando la función time.sleep().
+continue: Se salta el resto del bucle y se vuelve al inicio para realizar una nueva iteración.
+Si no se cumple la condición del paso 4 (no hay órdenes abiertas), se ejecuta el siguiente bloque de código:
+
+list_of_tickers = cliente.get_all_tickers(): Se obtiene una lista de todos los precios actuales 
+de los pares de trading utilizando el método get_all_tickers del cliente de Binance.
+Se realiza un bucle for para iterar sobre cada elemento (tick_2) en la lista list_of_tickers.
+Dentro del bucle, se verifica si el símbolo del elemento coincide con el símbolo de trading especificado (simbolo).
+Si el símbolo coincide, se obtiene el precio actual de la moneda y se almacena en la variable PrecioSimbolo como un valor de tipo float.
+En resumen, este fragmento de código verifica si existen órdenes abiertas para el símbolo de trading especificado. 
+Si hay órdenes abiertas, se imprime un mensaje indicando que no se realizará una nueva compra y se espera 10 segundos antes de continuar. 
+Si no hay órdenes abiertas, se obtiene el precio actual de la moneda y se almacena en la variable PrecioSimbolo. 
+Este código se utiliza para evitar la ejecución de nuevas compras si ya hay órdenes abiertas.
+
+6)
+Este fragmento de código corresponde al bloque de código que se ejecuta después de obtener el valor de la media móvil de 48 periodos 
+(ma48) y el precio actual de la moneda (PrecioSimbolo). A continuación, se explica paso a paso su funcionamiento:
+
+ma48 = _ma48_(): Se llama a la función _ma48_() para calcular la media móvil de 48 periodos. El valor calculado se asigna a la variable ma48.
+
+if (ma48 == 0): continue: Se verifica si el valor de ma48 es igual a 0. Si es así, se omite el resto del bucle y se vuelve al inicio para 
+realizar una nueva iteración. Esto significa que si no se pudo calcular la media móvil de 48 periodos, se ignora el bloque de código siguiente y 
+se espera a la próxima iteración.
+
+print("-------------------"+ simbolo +"-------------------"): Se imprime en pantalla una línea de separación que muestra el símbolo de trading.
+
+print("Precio actual de MA48: " + str('{:.4f}'.format(ma48))): Se imprime en pantalla el precio actual de la media móvil de 48 periodos. 
+El formato utilizado asegura que se muestren 4 decimales.
+
+print("Precio Actual de la moneda: " + str('{:.4f}'.format(PrecioSimbolo))): Se imprime en pantalla el precio actual de la moneda.
+
+print("Precio a comprar: "+str('{:.4f}'.format(ma48*0.995))): Se imprime en pantalla el precio al cual se realizaría la compra. 
+Se calcula multiplicando el valor de ma48 por 0.995 y se formatea para mostrar 4 decimales.
+
+if (not tendencia()):: Se verifica si la función tendencia() retorna False, lo que indica una tendencia bajista.
+
+Si la condición se cumple (tendencia bajista), se imprime en pantalla un mensaje indicando que no se realizarán órdenes de compra.
+Luego, se espera 15 segundos utilizando la función time.sleep() antes de continuar con la próxima iteración del bucle.
+Si no se cumple la condición del paso 7 (tendencia alcista), se ejecuta el siguiente bloque de código:
+
+Se imprime en pantalla un mensaje indicando que la tendencia es alcista y se procederá a realizar una compra si no hay órdenes abiertas.
+if (PrecioSimbolo > ma48*0.995):: Se verifica si el precio actual de la moneda (PrecioSimbolo) es mayor que el precio calculado para la compra (ma48*0.995).
+
+Si la condición se cumple, se imprime en pantalla el mensaje "COMPRANDO".
+orden = cliente.order_market_buy(...): Se utiliza el método order_market_buy del cliente de Binance para realizar una orden de compra de mercado.
+
+Se especifica el símbolo del par de trading (simbolo) y la cantidad a comprar (cantidadOrden).
+El resultado de la orden se almacena en la variable orden.
+time.sleep(5): Se detiene el programa durante 5 segundos utilizando la función time.sleep() antes de continuar con la próxima iteración del bucle.
+
+6)
+Este fragmento de código se encarga de crear una orden OCO (One Cancels the Other) para realizar una venta cuando se cumplan ciertas condiciones.
+ A continuación, se explica paso a paso su funcionamiento:
+
+orderoOCO = cliente.create_oco_order(...): Se utiliza el método create_oco_order del cliente de Binance para crear una orden OCO. 
+Esta orden consta de dos partes: una orden de stop y una orden límite.
+
+Los parámetros utilizados en la función create_oco_order son los siguientes:
+
+symbol: El símbolo del par de trading en el que se desea realizar la orden.
+side=SIDE_SELL: Se especifica que la orden es de venta.
+stopLimitPrice: El precio límite para la orden de stop. Se calcula multiplicando el PrecioSimbolo por 0.994 y se formatea para mostrar 4 decimales.
+stopLimitTimeinForce=TIME_IN_FORCE_GTC: El tipo de tiempo en vigencia para la orden de stop. En este caso, se utiliza TIME_IN_FORCE_GTC, que significa 
+"Good 'Til Canceled" (Válida hasta cancelación).
+quantity: La cantidad de la moneda a vender. Se calcula multiplicando cantidadOrden por 0.999. Esto se hace para tener en cuenta las tarifas que 
+cobra Binance y asegurarse de tener suficientes fondos para completar la orden.
+stopPrice: El precio de stop para activar la orden de venta. Se calcula multiplicando el PrecioSimbolo por 0.995 y se formatea para mostrar 4 decimales.
+Price: El precio límite para la orden de venta. Se calcula multiplicando el PrecioSimbolo por 0.995 y se formatea para mostrar 4 decimales.
+time.sleep(20): Se detiene el programa durante 20 segundos utilizando la función time.sleep(). Esto se hace para dar tiempo al mercado para 
+que opere después de abrir la orden OCO.
+
+En resumen, este fragmento de código crea una orden OCO de venta con una orden de stop y una orden límite, estableciendo los precios y cantidades
+ correspondientes. Luego, se detiene el programa por 20 segundos antes de continuar con la siguiente iteración del bucle.
